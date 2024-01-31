@@ -129,4 +129,4 @@ class RankRecovery:
         data = []
         for node, rank_score in ranking.items():
             data.append((node, self.G.nodes[node]['score'], rank_score))
-        return pd.DataFrame(data, columns=['node', 'orig score', 'rank score'])
+        return pd.DataFrame(data, columns=['node', 'perceived score', 'rank score'])

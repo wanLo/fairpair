@@ -2,7 +2,7 @@
 
 Create and evaluate pairwise comparison graphs considering accuracy and fairness.
 
-Install the python package with
+Install the Python package with
 ```
 pip install git+https://github.com/wanLo/fairpair
 ```

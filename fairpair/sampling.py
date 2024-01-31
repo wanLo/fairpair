@@ -67,11 +67,11 @@ class Sampling:
         self.iteration += 1
         if self.log_comparisons:
             for node, comparisons in self.G.comparisons:
-                df = pd.DataFrame({'node': node, 'unprivileged': self.G.nodes[node]['unprivileged'], 'iteration': self.iteration, 'comparisons': comparisons}, index=[0])
+                df = pd.DataFrame({'node': node, 'unprivileged': self.G.nodes[node]['unpriv'], 'iteration': self.iteration, 'comparisons': comparisons}, index=[0])
                 self.comparisons_over_time = pd.concat([self.comparisons_over_time, df], ignore_index=True)
         if self.log_success:
             for node, success in self.G.success_rates:
-                df = pd.DataFrame({'node': node, 'unprivileged': self.G.nodes[node]['unprivileged'], 'iteration': self.iteration, 'success': success}, index=[0])
+                df = pd.DataFrame({'node': node, 'unprivileged': self.G.nodes[node]['unpriv'], 'iteration': self.iteration, 'success': success}, index=[0])
                 self.success_over_time = pd.concat([self.success_over_time, df], ignore_index=True)
 
     def plot_comparisons_over_time(self, save_to='comparisons.png'):
