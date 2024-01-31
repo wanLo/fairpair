@@ -19,25 +19,25 @@ class FairPairGraph(nx.DiGraph):
         Parameters
         ----------
         - N: number of nodes
-        - Nm: number of minority nodes
+        - Nm: number of unprivileged nodes
         '''
         self.add_nodes_from(np.arange(N))
-        self.label_minority(Nm)
+        self.label_unpriv(Nm)
 
 
-    def label_minority(self, Nm: int, attr="minority", random=False, seed: Union[int, None] = None):
+    def label_unpriv(self, Nm: int, attr="unpriv", random=False, seed: Union[int, None] = None):
         '''
-        Label a subset of nodes as minority
+        Label a subset of nodes as unprivileged
 
         Parameters
         ----------
-        - Nm: number of minority nodes
+        - Nm: number of unprivileged nodes
         - attr: name of the node attribute to use as a group label
-        - random: whether to shuffle nodes before assigning minority attribute
+        - random: whether to shuffle nodes before assigning the "unprivileged" attribute
         - seed: seed for the random number generator
         '''
         N = len(self)
-        if Nm >= N: raise ValueError('Minority can have at most N-1 nodes.')
+        if Nm >= N: raise ValueError('Unprivileged group can have at most N-1 nodes.')
         labels = [i >= N - Nm  for i in np.arange(N)]
 
         if random:
@@ -189,27 +189,27 @@ class FairPairGraph(nx.DiGraph):
 
 
     @property
-    def minority(self, attr="minority") -> nx.Graph:
-        '''Returns a read-only graph view of the minority subgraph, see nx.subgraph_view'''
-        return nx.graphviews.subgraph_view(self, filter_node=lambda x: x in self.minority_nodes)
+    def unpriv(self, attr="unpriv") -> nx.Graph:
+        '''Returns a read-only graph view of the unpriv subgraph, see nx.subgraph_view'''
+        return nx.graphviews.subgraph_view(self, filter_node=lambda x: x in self.unpriv_nodes)
 
 
     @property
-    def minority_nodes(self, attr="minority") -> list:
-        '''Returns a list of minority nodes'''
+    def unpriv_nodes(self, attr="unpriv") -> list:
+        '''Returns a list of unprivileged nodes'''
         # TODO: implement this using nx.classes.reportviews.NodeView
         return [x for x,y in self.nodes(data=attr) if y]
 
 
     @property
-    def majority(self, attr="minority") -> nx.Graph:
-        '''Returns a read-only graph view of the majority subgraph, see nx.subgraph_view'''
-        return nx.graphviews.subgraph_view(self, filter_node=lambda x: x in self.majority_nodes)
+    def priv(self, attr="unpriv") -> nx.Graph:
+        '''Returns a read-only graph view of the priv subgraph, see nx.subgraph_view'''
+        return nx.graphviews.subgraph_view(self, filter_node=lambda x: x in self.priv_nodes)
 
 
     @property
-    def majority_nodes(self, attr="minority") -> list:
-        '''Returns a list of minority nodes'''
+    def priv_nodes(self, attr="unpriv") -> list:
+        '''Returns a list of unpriv nodes'''
         # TODO: implement this using nx.classes.reportviews.NodeView
         return [x for x,y in self.nodes(data=attr) if not y]
     

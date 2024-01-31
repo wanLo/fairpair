@@ -24,8 +24,8 @@ def fairPageRank(G:FairPairGraph, cutoff=0.4, phi=0.5, path='data/tmp'):
             file.write(f'{edge[0]} {edge[1]}\n')
     
     # write nodelist with groups
-    nodes = G.nodes(data='minority')
-    nodes = [(node, 1) if minority else (node, 0) for node, minority in nodes]
+    nodes = G.nodes(data='unpriv')
+    nodes = [(node, 1) if unpriv else (node, 0) for node, unpriv in nodes]
     community_path = Path(path,'out_community.txt')
     with open(community_path, 'w') as file:
         file.write('2\n') # we always have two groups
@@ -65,7 +65,7 @@ def randomRankRecovery(A: sp.spmatrix, seed: Union[int, None] = None):
 
 class RankRecovery:
 
-    def __init__(self, G:FairPairGraph, class_attr='minority', weight_attr='weight', score_attr='score'):
+    def __init__(self, G:FairPairGraph, class_attr='unpriv', weight_attr='weight', score_attr='score'):
         '''
         Initialize the ranking
 

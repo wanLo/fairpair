@@ -19,6 +19,18 @@ def scores_to_rank(ranking:dict, invert=True) -> dict:
     # convert to {node:rank} dict
     return {node: rank for node, rank in ranks}
 
+def _extract_ranks(graph:FairPairGraph, ranking:dict, subgraph: Union[FairPairGraph, None] = None, score_attr='score') -> Tuple[list, list]:
+    '''A helper to extract ranks (true + predicted from ranking) from nodes in a subgraph'''
+    if subgraph is None: subgraph = graph
+    # convert to ranks
+    ranking = scores_to_rank(ranking)
+    base_scores = {node: score for node, score in graph.nodes(data=score_attr)}
+    base_ranking = scores_to_rank(base_scores)
+    # extract the ranks in the order of subgraph.nodes
+    ranks_predicted = [ranking[node] for node in subgraph.nodes if node in ranking]
+    ranks_true = [base_ranking[node] for node in subgraph.nodes if node in ranking]
+    return ranks_true, ranks_predicted
+
 
 ##### (Group-Conditioned) Accuracy #####
 
@@ -64,19 +76,6 @@ def MSE(subgraph:FairPairGraph, ranking:dict, score_attr='score') -> float:
     # extract true scores for the nodes
     scores_true = [score for node, score in subgraph.nodes(data=score_attr) if node in ranking]
     return mean_squared_error(scores_true, scores_predicted.flatten())
-
-
-def _extract_ranks(graph:FairPairGraph, ranking:dict, subgraph: Union[FairPairGraph, None] = None, score_attr='score') -> Tuple[list, list]:
-    '''A helper to extract ranks (true + predicted from ranking) from nodes in a subgraph'''
-    if subgraph is None: subgraph = graph
-    # convert to ranks
-    ranking = scores_to_rank(ranking)
-    base_scores = {node: score for node, score in graph.nodes(data=score_attr)}
-    base_ranking = scores_to_rank(base_scores)
-    # extract the ranks in the order of subgraph.nodes
-    ranks_predicted = [ranking[node] for node in subgraph.nodes if node in ranking]
-    ranks_true = [base_ranking[node] for node in subgraph.nodes if node in ranking]
-    return ranks_true, ranks_predicted
 
 
 def rank_mean_error(graph:FairPairGraph, ranking:dict, subgraph: Union[FairPairGraph, None] = None) -> float:
@@ -133,6 +132,9 @@ def spearmanr(graph:FairPairGraph, ranking:dict, subgraph: Union[FairPairGraph, 
     #return stats.spearmanr(ranks_true, ranks_predicted)
 
     return stats.pearsonr(ranks_true, ranks_predicted)
+
+
+##### Group-Conditioned Weighted Kemeny Distance #####
 
 
 def weighted_tau(graph:FairPairGraph, ranking:dict, subgraph: Union[FairPairGraph, None] = None, score_attr='skill') -> float:
@@ -323,6 +325,9 @@ def weighted_tau_separate_nodes(base_scores:dict, ranking:dict, subgraph_nodes:l
     return tau_within, tau_between
 
 
+##### Additional Versions of Weighted Kemeny Distance #####
+
+
 def weighted_individual_tau(graph:FairPairGraph, ranking:dict, subgraph: Union[FairPairGraph, None] = None, score_attr='skill') -> List[float]:
     '''
     Calculates the weighted Kemedy distance for each node in a `ranking` separately,
@@ -405,12 +410,6 @@ def weighted_topk_tau(graph:FairPairGraph, ranking:dict, subgraph: Union[FairPai
 
 
 ##### Group-Representation #####
-
-
-def rND(graph:FairPairGraph, ranking:dict, subgraph: Union[FairPairGraph, None] = None) -> float:
-    '''
-    Calculates the rND score
-    '''
 
 
 def exposure(graph:FairPairGraph, ranking:dict, subgraph: Union[FairPairGraph, None] = None) -> float:

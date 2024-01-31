@@ -67,11 +67,11 @@ class Sampling:
         self.iteration += 1
         if self.log_comparisons:
             for node, comparisons in self.G.comparisons:
-                df = pd.DataFrame({'node': node, 'minority': self.G.nodes[node]['minority'], 'iteration': self.iteration, 'comparisons': comparisons}, index=[0])
+                df = pd.DataFrame({'node': node, 'unprivileged': self.G.nodes[node]['unprivileged'], 'iteration': self.iteration, 'comparisons': comparisons}, index=[0])
                 self.comparisons_over_time = pd.concat([self.comparisons_over_time, df], ignore_index=True)
         if self.log_success:
             for node, success in self.G.success_rates:
-                df = pd.DataFrame({'node': node, 'minority': self.G.nodes[node]['minority'], 'iteration': self.iteration, 'success': success}, index=[0])
+                df = pd.DataFrame({'node': node, 'unprivileged': self.G.nodes[node]['unprivileged'], 'iteration': self.iteration, 'success': success}, index=[0])
                 self.success_over_time = pd.concat([self.success_over_time, df], ignore_index=True)
 
     def plot_comparisons_over_time(self, save_to='comparisons.png'):
@@ -84,7 +84,7 @@ class Sampling:
     
     def _plot_over_time(self, data:pd.DataFrame, save_to:str, y:str, ylim=(None, None), alpha=1, **kwargs):
         '''A helper for plotting stats over time'''
-        ax = sns.lineplot(data=data, x='iteration', y=y, hue='minority', **kwargs)
+        ax = sns.lineplot(data=data, x='iteration', y=y, hue='unprivileged', **kwargs)
         ax.legend(ax.get_legend().legendHandles, ['Privileged', 'Unprivileged'], title=None, frameon=False)
         ax.set(ylim=ylim, xlim=(0, 100))
         plt.setp(ax.lines, alpha=alpha)
@@ -195,19 +195,19 @@ class GroupKnockoutSampling(Sampling):
         rng = np.random.default_rng(seed=seed)
         for iteration in range(iter):
             # success rates per group
-            minority_success = [rate for node, rate in self.G.success_rates if node in self.G.minority_nodes]
-            majority_success = [rate for node, rate in self.G.success_rates if node in self.G.majority_nodes]
+            unpriv_success = [rate for node, rate in self.G.success_rates if node in self.G.unpriv_nodes]
+            priv_success = [rate for node, rate in self.G.success_rates if node in self.G.priv_nodes]
             # highest success per group
-            minority_rate = max(minority_success)
-            majority_rate = max(majority_success)
+            unpriv_rate = max(unpriv_success)
+            priv_rate = max(priv_success)
             # overall highest and lowest success
-            max_rate = max([minority_rate, majority_rate])
-            min_rate = min([min(minority_success), min(majority_success)])
+            max_rate = max([unpriv_rate, priv_rate])
+            min_rate = min([min(unpriv_success), min(priv_success)])
             if (min_rate != max_rate):
                 # normalized success rates per group membership
-                minority_rate = (minority_rate-min_rate)/(max_rate-min_rate)
-                majority_rate = (majority_rate-min_rate)/(max_rate-min_rate)
-                normalized_rates = [minority_rate if node in self.G.minority_nodes else majority_rate for node in self.G.nodes]
+                unpriv_rate = (unpriv_rate-min_rate)/(max_rate-min_rate)
+                priv_rate = (priv_rate-min_rate)/(max_rate-min_rate)
+                normalized_rates = [unpriv_rate if node in self.G.unpriv_nodes else priv_rate for node in self.G.nodes]
                 normalized_rates = [rate/sum(normalized_rates) for rate in normalized_rates] # must sum to 1
                 selected_nodes = rng.choice(self.G.nodes, n, replace=False, p=normalized_rates)
             else:
@@ -217,28 +217,28 @@ class GroupKnockoutSampling(Sampling):
             self._split_and_compare(selected_nodes, k, seed)
 
 
-class OversampleMinority(Sampling):
+class Oversampling(Sampling):
 
     def apply(self, iter=1, k=10, f=0.2, p=0.5, seed: Union[int, None] = None):
         '''
-        Select n nodes randomly, with a share of p nodes from the minority
+        Select n nodes randomly, with a share of p nodes from the unprivileged group
 
         Parameters
         ----------
-        - iter: how many iterations of minority oversampling to perform
+        - iter: how many iterations of oversampling to perform
         - k: how often each sampled pair will be compared per iteration
         - f: fraction of nodes to sample in each iteration
-        - p: share (from n) of minority nodes to be selected for comparison
+        - p: share (from n) of unprivileged nodes to be selected for comparison
         - seed: seed for the random number generator
         '''
         n = int(len(self.G)*f) # how many nodes to sample
         rng = np.random.default_rng(seed=seed)
         for iteration in range(iter):
-            #from_minority = rng.binomial(n,p) # how many nodes will come from the minority
-            from_minority = int(np.ceil(len(self.G)*f*p))
-            selected_minority = rng.choice(self.G.minority_nodes, from_minority, replace=False)
-            selected_majority = rng.choice(self.G.majority_nodes, n-from_minority, replace=False)
-            selected_nodes = np.concatenate((selected_minority, selected_majority))
+            #from_unpriv = rng.binomial(n,p) # how many nodes will come from the unprivileged group
+            from_unpriv = int(np.ceil(len(self.G)*f*p))
+            selected_unpriv = rng.choice(self.G.unpriv_nodes, from_unpriv, replace=False)
+            selected_priv = rng.choice(self.G.priv_nodes, n-from_unpriv, replace=False)
+            selected_nodes = np.concatenate((selected_unpriv, selected_priv))
             self._split_and_compare(selected_nodes, k, seed)
 
 
