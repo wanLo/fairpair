@@ -117,6 +117,17 @@ class FairPairGraph(nx.DiGraph):
         self._update_scores()
 
 
+    def to_multidigraph(self, wins_attr="wins") -> nx.MultiDiGraph:
+        '''Returns a `nx.MultiDiGraph` representation of the FairPairGraph'''
+        multidigraph = nx.MultiDiGraph()
+        multidigraph.add_nodes_from(self.nodes(data=True)) # copy nodes with data
+
+        for u, v, wins in self.edges.data(wins_attr, default=1): # create multi-edges
+            multidigraph.add_edges_from([(u, v)] * wins)
+
+        return multidigraph
+
+
     def compare_pair(self, i, j, k = 1, node_attr="score", weight_attr="weight", wins_attr="wins", seed: Union[int, None] = None):
         '''
         Compares nodes i and j using the BTL-formula, k times (binomial distribution).

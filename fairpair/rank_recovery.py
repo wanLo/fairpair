@@ -10,11 +10,12 @@ from .fairgraph import FairPairGraph
 from .recovery_baselines import *
 
 
-def fairPageRank(G:FairPairGraph, cutoff=0.4, phi=0.5, path='data/tmp'):
-    '''A wrapper for the C++-based implementation of Fairness-Aware PageRank (Tsioutsiouliklis et al., 2021)'''
-    # get all edges with weights higher than or equal to cutof
-    edges = G.edges(data='weight')
-    edges = [(outgoing, incoming) for outgoing, incoming, weight in edges if weight>=cutoff]
+def fairPageRank(G:nx.MultiDiGraph, cutoff=0.4, phi=0.5, path='data/tmp'):
+    '''
+    A wrapper for the C++-based implementation of Fairness-Aware PageRank (Tsioutsiouliklis et al., 2021).
+    Make sure that you pass a `nx.MultiDiGraph` for this to work as intended.
+    '''
+    edges = G.edges # get edges
     
     # write edgelist
     graphfile_path = Path(path,'out_graph.txt')
@@ -102,7 +103,7 @@ class RankRecovery:
         ranking = None
         if nx.is_weakly_connected(self.G): # only apply ranking recovery if weakly connected
             if rank_using == 'fairPageRank':
-                ranking = fairPageRank(self.G, **kwargs)
+                ranking = fairPageRank(self.G.to_multidigraph(), **kwargs) # pass a nx.MultiDiGraph representation
                 ranking = dict(zip(self.G.nodes, ranking))
             else:
                 adjacency = nx.linalg.graphmatrix.adjacency_matrix(self.G, weight=self.weight_attr)
