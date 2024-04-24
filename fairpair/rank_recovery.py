@@ -10,7 +10,7 @@ from .fairgraph import FairPairGraph
 from .recovery_baselines import *
 
 
-def fairPageRank(G:nx.MultiDiGraph, cutoff=0.4, phi=0.5, path='data/tmp'):
+def fairPageRank(G:nx.MultiDiGraph, phi=0.5, path='data/tmp'):
     '''
     A wrapper for the C++-based implementation of Fairness-Aware PageRank (Tsioutsiouliklis et al., 2021).
     Make sure that you pass a `nx.MultiDiGraph` for this to work as intended.
