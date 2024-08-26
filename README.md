@@ -1,4 +1,4 @@
-# fairpair
+# Fair Pairs: Fairness-Aware Ranking Recovery from Pairwise Comparisons
 
 Create and evaluate pairwise comparison graphs considering accuracy and fairness.
 
