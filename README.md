@@ -9,6 +9,12 @@ pip install git+https://github.com/wanLo/fairpair
 
 Experiments we conducted can be found a [separate repository](https://github.com/wanLo/fairpair_notebooks).
 
+This repository also includes the [appendix](./appendix.pdf) to our [pre-print](https://arxiv.org/abs/2408.13034). Cite us:
+
+```
+Georg Ahnert, Antonio Ferrara, and Claudia Wagner (2024). Fair Pairs: Fairness-Aware Ranking Recovery from Pairwise Comparisons. arXiv preprint arXiv:2408.13034
+```
+
 ## Overview
 
 See [examples/example.ipynb](examples/example.ipynb) for a general overview of the available functionality, [examples/sampling.ipynb](examples/sampling.ipynb) for a comparison of proposed sampling strategies, and [examples/ranking.ipynb](examples/ranking.ipynb) for how to generate and evaluate rankings.
