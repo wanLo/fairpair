@@ -356,7 +356,7 @@ def serialRank_matrix(A):
     return S
 
 
-def btl(A,tol=1e-3):
+def btl(A,tol=1e-6,seed=1): # tol=1e-3
     # g = btl(A,tol)
     #   INPUTS:
     # A is a NxN matrix representing a directed network
@@ -371,16 +371,17 @@ def btl(A,tol=1e-3):
     # Hunter DR (2004) MM algorithms for generalized Bradley-Terry models. 
     # Annals of Statistics pp. 384?406
 
+    rng = np.random.default_rng(seed=seed)
     A = sp.lil_matrix(A)
     A.setdiag(0)
     A = sp.csr_matrix(A)
     A.eliminate_zeros()
     N = A.shape[0]
-    g = np.random.uniform(size=N) # random initial guesss
+    g = rng.uniform(size=N) # random initial guesss
     wins = np.array(A.sum(1)).flatten()
     matches = A + A.transpose()
     totalMatches = np.array(matches.sum(0)).flatten()
-    g_prev = np.random.uniform(size=N)
+    g_prev = rng.uniform(size=N)
     eps=1e-6
     while np.linalg.norm(g-g_prev, 2) > tol:
         g_prev = g
